@@ -75,8 +75,8 @@ def analyze_proposal_with_gemini(markdown_content: str) -> str:
         
         genai.configure(api_key=gemini_api_key)
         
-        # Use Gemini 1.5 Pro or Flash model for deep research
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        # Use Gemini 2.5 Pro or Flash model for deep research
+        model = genai.GenerativeModel('gemini-2.5-pro')
         
         # Construct the prompt
         prompt = f"""Role: "You are the 'Cardano Proposal Assessment Expert', an impartial, highly structured, and detail-oriented AI analyst."
