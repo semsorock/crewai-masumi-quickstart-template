@@ -1,4 +1,4 @@
-This **CrewAI Masumi Starter Kit** lets you quickly deploy your own CrewAI agents and integrate them with Masumi's decentralized payment solution. This template includes a fully functional **Cardano Proposal Analyzer** that demonstrates the power of multi-agent AI workflows.
+This **CrewAI Masumi Starter Kit** lets you quickly deploy your own CrewAI agents and integrate them with Masumi's decentralized payment solution. This template includes a fully functional **(CaPRA) Catalyst Proposal Reviewing Assistant** that demonstrates the power of multi-agent AI workflows.
 
 **Key benefits:**
 
@@ -85,9 +85,9 @@ For more detailed explanations, go to [Environment Variables](https://docs.masum
 
 ### **3. Define and Test Your CrewAI Agents**
 
-Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that implements a **Cardano Proposal Analyzer** - a sophisticated AI-powered assessment tool for evaluating Cardano Catalyst proposals. Here you can define your agent functionality.
+Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that implements a **(CaPRA) Catalyst Proposal Reviewing Assistant** - a sophisticated AI-powered assessment tool for evaluating Cardano Catalyst proposals. Here you can define your agent functionality.
 
-The current implementation is a **Cardano Proposal Analyzer** that:
+The current implementation is a **(CaPRA) Catalyst Proposal Reviewing Assistant** that:
 - Accepts a Cardano proposal URL as input (e.g., from Catalyst Explorer)
 - Fetches and scrapes the proposal webpage content using BeautifulSoup
 - Uses four specialized AI agents working in sequence:
@@ -115,7 +115,7 @@ The application supports two modes:
 ```bash
 python main.py
 ```
-This runs the Cardano Proposal Analyzer with a test Cardano Catalyst proposal URL and displays the comprehensive assessment report directly in the terminal. Perfect for development and testing.
+This runs the (CaPRA) Catalyst Proposal Reviewing Assistant with a test Cardano Catalyst proposal URL and displays the comprehensive assessment report directly in the terminal. Perfect for development and testing.
 
 **2. API mode** - Run with full Masumi payment integration:
 ```bash
@@ -127,14 +127,14 @@ This starts the FastAPI server with blockchain payment capabilities.
 
 ###  **4. API Mode with Masumi Integration**
 
-When running in API mode (`python main.py api`), your Cardano Proposal Analyzer is exposed via a FastAPI interface that follows the [MIP-003](https://github.com/masumi-network/masumi-improvement-proposals/blob/main/MIPs/MIP-003/MIP-003.md) standard for Masumi-compatible services.
+When running in API mode (`python main.py api`), your (CaPRA) Catalyst Proposal Reviewing Assistant is exposed via a FastAPI interface that follows the [MIP-003](https://github.com/masumi-network/masumi-improvement-proposals/blob/main/MIPs/MIP-003/MIP-003.md) standard for Masumi-compatible services.
 
 Access the interactive API documentation at:
 http://localhost:8000/docs
 
 #### Available Endpoints:
 
-- `GET /input_schema` - Returns input requirements for the Cardano Proposal Analyzer (expects a proposal URL)
+- `GET /input_schema` - Returns input requirements for the (CaPRA) Catalyst Proposal Reviewing Assistant (expects a proposal URL)
 - `GET /availability` - Checks if the server is operational
 - `POST /start_job` - Initiates a new proposal analysis task with payment request
 - `GET /status` - Checks job and payment status, returns the analysis report when complete
@@ -212,7 +212,7 @@ Before accepting payments, register your agent on the Masumi Network:
 
 ### **8. Test Your Monetized Agent**
 
-Your Cardano Proposal Analyzer is now ready to accept payments! Test the complete workflow:
+Your (CaPRA) Catalyst Proposal Reviewing Assistant is now ready to accept payments! Test the complete workflow:
 
 Start a paid proposal analysis job:
 

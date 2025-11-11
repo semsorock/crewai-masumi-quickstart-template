@@ -54,7 +54,7 @@ def fetch_url_content(url):
         return f"Error fetching URL: {str(e)}"
 
 
-@tool("Cardano Proposal Analyzer")
+@tool("(CaPRA) Catalyst Proposal Reviewing Assistant")
 def analyze_proposal_with_gemini(markdown_content: str) -> str:
     """
     Analyze a Cardano proposal using Gemini API's deep research feature.
@@ -269,11 +269,11 @@ class ResearchCrew:
         # Task to analyze the proposal with Gemini
         assessment_task = Task(
             description="""
-            Analyze the markdown proposal content using the Cardano Proposal Analyzer tool.
+            Analyze the markdown proposal content using the (CaPRA) Catalyst Proposal Reviewing Assistant tool.
             
             You must:
             1. Take the markdown content from the previous task (Markdown Documentation Specialist)
-            2. Use the 'Cardano Proposal Analyzer' tool to perform a deep assessment of the proposal
+            2. Use the '(CaPRA) Catalyst Proposal Reviewing Assistant' tool to perform a deep assessment of the proposal
             3. The tool will use Gemini API's deep research capabilities to evaluate the proposal
             4. Return the JSON assessment exactly as provided by the tool
             
