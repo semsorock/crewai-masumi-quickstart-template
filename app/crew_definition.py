@@ -207,7 +207,20 @@ class ResearchCrew:
             tools=[analyze_proposal_with_gemini]
         )
         
-        self.logger.info("Created content scraper, markdown formatter, and proposal assessor agents")
+        # Create Professional Report Writer Agent
+        report_writer = Agent(
+            role='Professional Report Writer',
+            goal='Transform structured JSON assessment data into beautifully formatted, professional markdown reports',
+            backstory='You are an expert technical writer who specializes in creating visually appealing, '
+                      'professional reports. You excel at transforming structured data into clear, engaging '
+                      'markdown documents with proper formatting, visual indicators, and logical flow. '
+                      'You preserve all data integrity while making information accessible and attractive.',
+            verbose=self.verbose,
+            allow_delegation=False,
+            llm=llm
+        )
+        
+        self.logger.info("Created content scraper, markdown formatter, proposal assessor, and report writer agents")
         
         # Task to scrape exact content
         scrape_task = Task(
@@ -278,10 +291,45 @@ class ResearchCrew:
             context=[markdown_task]  # This task depends on the markdown_task output
         )
         
-        # Create crew with all three tasks
+        # Task to create professional markdown report from JSON assessment
+        report_task = Task(
+            description="""
+            Transform the JSON assessment from the Cardano Proposal Assessment Expert into a beautifully 
+            formatted, professional markdown report.
+            
+            The report MUST include the following sections in this order:
+            
+            1. **Executive Summary** - Use the OverallSummary from the JSON
+            2. **Proposal Completeness** - Display the completeness status with visual indicator
+            3. **Trust & Reliability Assessment** - Create a formatted table or list of all 10 criteria
+            4. **Context & Impact Assessment** - Create a formatted table or list of all 8 criteria
+            5. **Financial Assessment** - Create a formatted table or list of all 3 criteria
+            6. **Conclusion** - A brief concluding statement
+            
+            Formatting requirements:
+            - Use appropriate markdown headers (# ## ###)
+            - Use visual indicators for scores:
+              - ✅ for positive (+) scores
+              - ❌ for negative (-) scores
+              - ⚠️ for conditional (+)/(-) or uncertain (?) scores
+            - Use blockquotes (>) for the Executive Summary
+            - Use bullet points or tables for criteria lists
+            - Use horizontal rules (---) to separate major sections
+            - Use bold and italic text appropriately for emphasis
+            - Ensure the report is professional, clean, and easy to read
+            
+            CRITICAL: Preserve ALL data from the JSON assessment without modification. 
+            Do not add, remove, or alter any scores or rationales - only format them beautifully.
+            """,
+            agent=report_writer,
+            expected_output='A professional, beautifully formatted markdown report with all assessment data presented in an easy-to-read format with visual indicators',
+            context=[assessment_task]  # This task depends on the assessment_task output
+        )
+        
+        # Create crew with all four tasks
         crew = Crew(
-            agents=[content_scraper, markdown_formatter, proposal_assessor],
-            tasks=[scrape_task, markdown_task, assessment_task],
+            agents=[content_scraper, markdown_formatter, proposal_assessor, report_writer],
+            tasks=[scrape_task, markdown_task, assessment_task, report_task],
             verbose=self.verbose
         )
         
