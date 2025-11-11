@@ -80,7 +80,13 @@ For more detailed explanations, go to [Environment Variables](https://docs.masum
 
 ### **3. Define and Test Your CrewAI Agents**
 
-Take a look at the `crew_definition.py` file. It has a basic `ResearchCrew`. Here you can define your agent functionality.
+Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that converts URL content to markdown format. Here you can define your agent functionality.
+
+The current implementation:
+- Accepts a URL as input
+- Fetches the webpage content using BeautifulSoup
+- Uses two specialized agents (Content Scraper and Markdown Formatter)
+- Returns well-formatted markdown of the webpage content
 
 If you would like to develop your own agent crew, go to [CrewAI Docs Core Concepts](https://docs.crewai.com/en/concepts/agents) to learn more.
 
@@ -200,7 +206,7 @@ curl -X POST "http://localhost:8000/start_job" \
 -H "Content-Type: application/json" \
 -d '{
     "identifier_from_purchaser": "<put HEX of even character>",
-    "input_data": {"text": "artificial intelligence trends"}
+    "input_data": {"url": "https://www.catalystexplorer.com/en/proposals/cardano-india-developers-community-hub-f14/details"}
 }'
 ```
 

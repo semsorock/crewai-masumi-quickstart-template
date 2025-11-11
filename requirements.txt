@@ -6,3 +6,5 @@ masumi
 pydantic
 python-multipart
 httpx
+requests
+beautifulsoup4

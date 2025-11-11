@@ -57,7 +57,7 @@ class StartJobRequest(BaseModel):
             "example": {
                 "identifier_from_purchaser": "example_purchaser_123",
                 "input_data": {
-                    "text": "Write a story about a robot learning to paint"
+                    "url": "https://example.com"
                 }
             }
         }
@@ -68,12 +68,13 @@ class ProvideInputRequest(BaseModel):
 # ─────────────────────────────────────────────────────────────────────────────
 # CrewAI Task Execution
 # ─────────────────────────────────────────────────────────────────────────────
-async def execute_crew_task(input_data: str) -> str:
-    """ Execute a CrewAI task with Research and Writing Agents """
-    logger.info(f"Starting CrewAI task with input: {input_data}")
-    crew = ResearchCrew(logger=logger)
-    inputs = {"text": input_data}
-    result = crew.crew.kickoff(inputs)
+async def execute_crew_task(input_data: dict) -> str:
+    """ Execute a CrewAI task to convert URL to markdown """
+    url = input_data.get("url", "")
+    logger.info(f"Starting CrewAI task with URL: {url}")
+    crew_instance = ResearchCrew(logger=logger)
+    crew = crew_instance.create_crew(url)
+    result = crew.kickoff()
     logger.info("CrewAI task completed successfully")
     return result
 
@@ -89,10 +90,10 @@ async def start_job(data: StartJobRequest):
         job_id = str(uuid.uuid4())
         agent_identifier = os.getenv("AGENT_IDENTIFIER")
         
-        # Log the input text (truncate if too long)
-        input_text = data.input_data["text"]
-        truncated_input = input_text[:100] + "..." if len(input_text) > 100 else input_text
-        logger.info(f"Received job request with input: '{truncated_input}'")
+        # Log the input URL (truncate if too long)
+        input_url = data.input_data.get("url", "")
+        truncated_input = input_url[:100] + "..." if len(input_url) > 100 else input_url
+        logger.info(f"Received job request with URL: '{truncated_input}'")
         logger.info(f"Starting job {job_id} with agent {agent_identifier}")
 
         # Define payment amounts
@@ -272,12 +273,12 @@ async def input_schema():
     return {
         "input_data": [
             {
-                "id": "text",
+                "id": "url",
                 "type": "string",
-                "name": "Task Description",
+                "name": "URL",
                 "data": {
-                    "description": "The text input for the AI task",
-                    "placeholder": "Enter your task description here"
+                    "description": "The URL of the webpage to convert to markdown",
+                    "placeholder": "https://example.com"
                 }
             }
         ]
@@ -305,22 +306,23 @@ def main():
     os.environ['CREWAI_DISABLE_TELEMETRY'] = 'true'
     
     print("\n" + "=" * 70)
-    print("🚀 Running CrewAI agents locally (standalone mode)...")
+    print("🚀 Running CrewAI URL to Markdown agent locally (standalone mode)...")
     print("=" * 70 + "\n")
     
     # Define test input
-    input_data = {"text": "The impact of AI on the job market"}
+    input_data = {"url": "https://www.catalystexplorer.com/en/proposals/cardano-india-developers-community-hub-f14/details"}
     
-    print(f"Input: {input_data['text']}")
+    print(f"Input URL: {input_data['url']}")
     print("\nProcessing with CrewAI agents...\n")
     
     # Initialize and run the crew
-    crew = ResearchCrew(verbose=True)
-    result = crew.crew.kickoff(inputs=input_data)
+    crew_instance = ResearchCrew(verbose=True)
+    crew = crew_instance.create_crew(input_data['url'])
+    result = crew.kickoff()
     
     # Display the result
     print("\n" + "=" * 70)
-    print("✅ Crew Output:")
+    print("✅ Crew Output (Markdown):")
     print("=" * 70 + "\n")
     print(result)
     print("\n" + "=" * 70 + "\n")
