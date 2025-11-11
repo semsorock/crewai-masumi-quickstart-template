@@ -1,9 +1,13 @@
 import os
 
 from crewai import Agent, Crew, LLM, Task
+from crewai.tools import tool
 from logging_config import get_logger
 import requests
 from bs4 import BeautifulSoup
+import os
+import json
+import google.generativeai as genai
 
 def fetch_url_content(url):
     """
@@ -50,6 +54,96 @@ def fetch_url_content(url):
         return f"Error fetching URL: {str(e)}"
 
 
+@tool("Cardano Proposal Analyzer")
+def analyze_proposal_with_gemini(markdown_content: str) -> str:
+    """
+    Analyze a Cardano proposal using Gemini API's deep research feature.
+    This tool takes markdown content of a proposal and returns a comprehensive
+    JSON assessment based on Trust/Reliability, Context/Impact, and Financial criteria.
+    
+    Args:
+        markdown_content: The markdown content of the proposal
+        
+    Returns:
+        str: JSON formatted assessment of the proposal
+    """
+    try:
+        # Configure Gemini API
+        gemini_api_key = os.getenv("GEMINI_API_KEY")
+        if not gemini_api_key:
+            return json.dumps({"error": "GEMINI_API_KEY not configured"})
+        
+        genai.configure(api_key=gemini_api_key)
+        
+        # Use Gemini 2.5 Pro or Flash model for deep research
+        model = genai.GenerativeModel('gemini-2.5-pro')
+        
+        # Construct the prompt
+        prompt = f"""Role: "You are the 'Cardano Proposal Assessment Expert', an impartial, highly structured, and detail-oriented AI analyst."
+Goal: "Your sole function is to take raw proposal content (HTML/Markdown) and rigorously evaluate it against a fixed set of Trust/Reliability, Context/Impact, and Financial criteria. You must generate a consistent, structured output for downstream processing."
+Format Constraint: "You MUST output your response as a single, valid JSON object. Do not include any introductory text, markdown, or commentary outside of the JSON block."
+
+Proposal Content:
+{markdown_content}
+
+Generate a comprehensive assessment in the following JSON format:
+{{
+  "OverallSummary": "A 3-sentence, professional summary of the proposal's strengths and weaknesses.",
+  "ProposalCompleteness": "(+) / (-) - Indicate if all sections appear fulfilled.",
+  "TrustAndReliability": [
+    {{"Criteria": "Recency of Success (Time Factor)", "Score": "(+)/(-)", "Rationale": ""}},
+    {{"Criteria": "Certified Reputation / Role-based Trust", "Score": "(+)/(-)", "Rationale": ""}},
+    {{"Criteria": "History of Finished Proposals", "Score": "(+)/(-)", "Rationale": "Combines successful completion and completion with missing milestones."}},
+    {{"Criteria": "Company/Team Public History (e.g., 10yrs listed vs. recently funded)", "Score": "(+)/(-)", "Rationale": ""}},
+    {{"Criteria": "Transitivity Rate of Positive Feedback", "Score": "(+)/(-)", "Rationale": ""}},
+    {{"Criteria": "Cross-Platform Reputation (Positive/Negative)", "Score": "(+)/(-)", "Rationale": "Combines team representation on other platforms and negative representation."}},
+    {{"Criteria": "Deception/Misinformation History", "Score": "(-)", "Rationale": ""}},
+    {{"Criteria": "Behavioral Volatility Detection", "Score": "(-)", "Rationale": ""}},
+    {{"Criteria": "Discrimination Detection", "Score": "(-)", "Rationale": ""}},
+    {{"Criteria": "Adaptability/Dynamism Demonstrated", "Score": "(+)", "Rationale": ""}}
+  ],
+  "ContextAndImpact": [
+    {{"Criteria": "Context/Criteria Similarity Rate", "Score": "(+)", "Rationale": ""}},
+    {{"Criteria": "Support for Multiple Success Criteria", "Score": "(+)", "Rationale": ""}},
+    {{"Criteria": "Measurable Effect and Alignment to Category", "Score": "(+)/(-)", "Rationale": "Combines Measurable Effect & Proposal Category Alignment."}},
+    {{"Criteria": "High Impact Potential", "Score": "(+)/(-)", "Rationale": "Based on evidence of high potential impact."}},
+    {{"Criteria": "Social / Human Element Importance", "Score": "(+)/(-)", "Rationale": ""}},
+    {{"Criteria": "Potential Risk / Negative Effect", "Score": "(-)/(?)", "Rationale": ""}},
+    {{"Criteria": "Plan for Scaling Solution / Reach Limit", "Score": "(+)/(-)", "Rationale": ""}},
+    {{"Criteria": "Geographic Problem Focus/Relevance", "Score": "(+)/(-)", "Rationale": ""}}
+  ],
+  "FinancialAssessment": [
+    {{"Criteria": "Cost vs. Overall Assessed Impact", "Score": "(+)/(-)", "Rationale": "Evaluates if cost is justified compared to impact."}},
+    {{"Criteria": "Non-Commercial Cost Justification", "Score": "(+)/(-)", "Rationale": "Evaluates cost acceptability for non-commercial projects."}},
+    {{"Criteria": "Likelihood of Fast Implementation & Commercial Return", "Score": "(+)/(-)", "Rationale": ""}}
+  ]
+}}"""
+        
+        # Generate content with Gemini
+        response = model.generate_content(prompt)
+        
+        # Extract the JSON from the response
+        response_text = response.text.strip()
+        
+        # Try to extract JSON if wrapped in markdown code blocks
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]  # Remove ```json
+        if response_text.startswith("```"):
+            response_text = response_text[3:]  # Remove ```
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]  # Remove trailing ```
+        
+        response_text = response_text.strip()
+        
+        # Validate it's valid JSON
+        json.loads(response_text)
+        
+        return response_text
+    except Exception as e:
+        return json.dumps({"error": f"Error analyzing proposal: {str(e)}"})
+
+
+
 class ResearchCrew:
     def __init__(self, verbose=True, logger=None):
         self.verbose = verbose
@@ -59,7 +153,7 @@ class ResearchCrew:
 
     def create_crew(self, url):
         """
-        Create a crew to transform URL content to markdown.
+        Create a crew to transform URL content to markdown and analyze it.
         
         Args:
             url: The URL to fetch and transform
@@ -101,7 +195,19 @@ class ResearchCrew:
             llm=llm
         )
         
-        self.logger.info("Created content scraper and markdown formatter agents")
+        # Create Cardano Proposal Assessment Expert Agent
+        proposal_assessor = Agent(
+            role='Cardano Proposal Assessment Expert',
+            goal='Rigorously evaluate Cardano proposals against Trust/Reliability, Context/Impact, and Financial criteria',
+            backstory='You are an impartial, highly structured, and detail-oriented AI analyst specializing in '
+                      'Cardano proposal assessment. You evaluate proposals systematically using a fixed set of '
+                      'criteria and generate structured JSON assessments for downstream processing.',
+            verbose=self.verbose,
+            allow_delegation=False,
+            tools=[analyze_proposal_with_gemini]
+        )
+        
+        self.logger.info("Created content scraper, markdown formatter, and proposal assessor agents")
         
         # Task to scrape exact content
         scrape_task = Task(
@@ -147,10 +253,35 @@ class ResearchCrew:
             expected_output='A well-formatted markdown document containing all exact details from the webpage without analysis, with all links preserved in markdown format'
         )
         
-        # Create crew
+        # Task to analyze the proposal with Gemini
+        assessment_task = Task(
+            description="""
+            Analyze the markdown proposal content using the Cardano Proposal Analyzer tool.
+            
+            You must:
+            1. Take the markdown content from the previous task (Markdown Documentation Specialist)
+            2. Use the 'Cardano Proposal Analyzer' tool to perform a deep assessment of the proposal
+            3. The tool will use Gemini API's deep research capabilities to evaluate the proposal
+            4. Return the JSON assessment exactly as provided by the tool
+            
+            The tool will output a valid JSON object with:
+            - OverallSummary (3-sentence professional summary)
+            - ProposalCompleteness ((+) or (-))
+            - TrustAndReliability (array of 10 criteria assessments)
+            - ContextAndImpact (array of 8 criteria assessments)
+            - FinancialAssessment (array of 3 criteria assessments)
+            
+            Simply pass the markdown content to the tool and return its output.
+            """,
+            agent=proposal_assessor,
+            expected_output='A valid JSON object containing a comprehensive structured assessment of the Cardano proposal',
+            context=[markdown_task]  # This task depends on the markdown_task output
+        )
+        
+        # Create crew with all three tasks
         crew = Crew(
-            agents=[content_scraper, markdown_formatter],
-            tasks=[scrape_task, markdown_task],
+            agents=[content_scraper, markdown_formatter, proposal_assessor],
+            tasks=[scrape_task, markdown_task, assessment_task],
             verbose=self.verbose
         )
         

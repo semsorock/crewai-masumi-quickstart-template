@@ -69,24 +69,36 @@ SELLER_VKEY=your_selling_wallet_vkey
 # OpenAI API
 OPENAI_API_KEY=your_openai_api_key
 
+# Gemini API
+GEMINI_API_KEY=your_gemini_api_key
+
 # Network
 NETWORK=Preprod # or Mainnet
 ```
 
 For more detailed explanations, go to [Environment Variables](https://docs.masumi.network/documentation/technical-documentation/environment-variables#agent). 
 #### Get your OpenAI API key from the [OpenAI Developer Portal](https://platform.openai.com/api-keys).
+#### Get your Gemini API key from the [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 ---
 
 ### **3. Define and Test Your CrewAI Agents**
 
-Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that converts URL content to markdown format. Here you can define your agent functionality.
+Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that converts URL content to markdown format and analyzes Cardano proposals. Here you can define your agent functionality.
 
 The current implementation:
-- Accepts a URL as input
+- Accepts a URL as input (specifically Cardano proposal URLs)
 - Fetches the webpage content using BeautifulSoup
-- Uses two specialized agents (Content Scraper and Markdown Formatter)
-- Returns well-formatted markdown of the webpage content
+- Uses three specialized agents:
+  - **Content Scraper**: Extracts exact details from the web content
+  - **Markdown Formatter**: Transforms content into well-structured markdown
+  - **Cardano Proposal Assessment Expert**: Analyzes proposals using Gemini API's deep research capabilities
+- Returns a structured JSON assessment with:
+  - Overall summary of the proposal
+  - Proposal completeness evaluation
+  - Trust and reliability assessment (10 criteria)
+  - Context and impact evaluation (8 criteria)
+  - Financial assessment (3 criteria)
 
 If you would like to develop your own agent crew, go to [CrewAI Docs Core Concepts](https://docs.crewai.com/en/concepts/agents) to learn more.
 

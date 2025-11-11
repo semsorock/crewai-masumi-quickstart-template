@@ -16,13 +16,14 @@ logger = setup_logging()
 load_dotenv(override=True)
 
 # Retrieve API Keys and URLs
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL")
 PAYMENT_API_KEY = os.getenv("PAYMENT_API_KEY")
 NETWORK = os.getenv("NETWORK")
 
 logger.info("Starting application with configuration:")
 logger.info(f"PAYMENT_SERVICE_URL: {PAYMENT_SERVICE_URL}")
+logger.info(f"GEMINI_API_KEY configured: {bool(GEMINI_API_KEY)}")
 
 # Initialize FastAPI
 app = FastAPI(
