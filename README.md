@@ -1,10 +1,11 @@
-This **CrewAI Masumi Starter Kit** lets you quickly deploy your own CrewAI agents and integrate them with Masumi's decentralized payment solution.
+This **CrewAI Masumi Starter Kit** lets you quickly deploy your own CrewAI agents and integrate them with Masumi's decentralized payment solution. This template includes a fully functional **Cardano Proposal Analyzer** that demonstrates the power of multi-agent AI workflows.
 
 **Key benefits:**
 
 - Simple setup: Just clone, configure, and deploy.
 - Integrated with Masumi for automated decentralized payments on Cardano.
 - Production-ready API built with FastAPI.
+- Example implementation: A sophisticated Cardano proposal assessment tool powered by Gemini AI.
 
 ---
 
@@ -84,21 +85,23 @@ For more detailed explanations, go to [Environment Variables](https://docs.masum
 
 ### **3. Define and Test Your CrewAI Agents**
 
-Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that converts URL content to markdown format and analyzes Cardano proposals. Here you can define your agent functionality.
+Take a look at the `crew_definition.py` file. It has a `ResearchCrew` that implements a **Cardano Proposal Analyzer** - a sophisticated AI-powered assessment tool for evaluating Cardano Catalyst proposals. Here you can define your agent functionality.
 
-The current implementation:
-- Accepts a URL as input (specifically Cardano proposal URLs)
-- Fetches the webpage content using BeautifulSoup
-- Uses three specialized agents:
-  - **Content Scraper**: Extracts exact details from the web content
-  - **Markdown Formatter**: Transforms content into well-structured markdown
-  - **Cardano Proposal Assessment Expert**: Analyzes proposals using Gemini API's deep research capabilities
-- Returns a structured JSON assessment with:
-  - Overall summary of the proposal
+The current implementation is a **Cardano Proposal Analyzer** that:
+- Accepts a Cardano proposal URL as input (e.g., from Catalyst Explorer)
+- Fetches and scrapes the proposal webpage content using BeautifulSoup
+- Uses four specialized AI agents working in sequence:
+  - **Content Scraper**: Extracts exact details from the proposal webpage
+  - **Markdown Formatter**: Transforms content into well-structured markdown format
+  - **Cardano Proposal Assessment Expert**: Uses Gemini API's deep research capabilities to rigorously evaluate the proposal against 21 specific criteria
+  - **Professional Report Writer**: Transforms the structured JSON assessment into a beautifully formatted markdown report
+- Returns a comprehensive professional markdown report with:
+  - Executive summary of the proposal
   - Proposal completeness evaluation
-  - Trust and reliability assessment (10 criteria)
-  - Context and impact evaluation (8 criteria)
-  - Financial assessment (3 criteria)
+  - Trust and reliability assessment (10 criteria including team history, reputation, track record)
+  - Context and impact evaluation (8 criteria including potential impact, scalability, social importance)
+  - Financial assessment (3 criteria including cost justification and ROI potential)
+  - Visual indicators (✅ ❌ ⚠️) for easy interpretation
 
 If you would like to develop your own agent crew, go to [CrewAI Docs Core Concepts](https://docs.crewai.com/en/concepts/agents) to learn more.
 
@@ -112,7 +115,7 @@ The application supports two modes:
 ```bash
 python main.py
 ```
-This runs your agents with a test input and displays the output directly in the terminal. Perfect for development and testing.
+This runs the Cardano Proposal Analyzer with a test Cardano Catalyst proposal URL and displays the comprehensive assessment report directly in the terminal. Perfect for development and testing.
 
 **2. API mode** - Run with full Masumi payment integration:
 ```bash
@@ -124,17 +127,17 @@ This starts the FastAPI server with blockchain payment capabilities.
 
 ###  **4. API Mode with Masumi Integration**
 
-When running in API mode (`python main.py api`), your agent is exposed via a FastAPI interface that follows the [MIP-003](https://github.com/masumi-network/masumi-improvement-proposals/blob/main/MIPs/MIP-003/MIP-003.md) standard for Masumi-compatible services.
+When running in API mode (`python main.py api`), your Cardano Proposal Analyzer is exposed via a FastAPI interface that follows the [MIP-003](https://github.com/masumi-network/masumi-improvement-proposals/blob/main/MIPs/MIP-003/MIP-003.md) standard for Masumi-compatible services.
 
 Access the interactive API documentation at:
 http://localhost:8000/docs
 
 #### Available Endpoints:
 
-- `GET /input_schema` - Returns input requirements for your agent
+- `GET /input_schema` - Returns input requirements for the Cardano Proposal Analyzer (expects a proposal URL)
 - `GET /availability` - Checks if the server is operational
-- `POST /start_job` - Initiates a new AI task with payment request
-- `GET /status` - Checks job and payment status
+- `POST /start_job` - Initiates a new proposal analysis task with payment request
+- `GET /status` - Checks job and payment status, returns the analysis report when complete
 - `POST /provide_input` - Provides additional input (if needed)
 
 
@@ -209,9 +212,9 @@ Before accepting payments, register your agent on the Masumi Network:
 
 ### **8. Test Your Monetized Agent**
 
-Your agent is now ready to accept payments! Test the complete workflow:
+Your Cardano Proposal Analyzer is now ready to accept payments! Test the complete workflow:
 
-Start a paid job:
+Start a paid proposal analysis job:
 
 ```bash
 curl -X POST "http://localhost:8000/start_job" \
@@ -239,7 +242,7 @@ curl -X POST 'http://localhost:3001/api/v1/purchase' \
   }'
 ```
 
-## Your agent will process the job and return results once payment is confirmed!
+## Your analyzer will process the proposal and return a comprehensive assessment report once payment is confirmed!
 
 
 
