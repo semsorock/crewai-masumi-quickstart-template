@@ -7,13 +7,13 @@ from bs4 import BeautifulSoup
 
 def fetch_url_content(url):
     """
-    Fetch and parse content from a URL.
+    Fetch and parse content from a URL, preserving links in markdown format.
     
     Args:
         url: The URL to fetch content from
         
     Returns:
-        str: The cleaned text content from the URL, or an error message
+        str: The cleaned text content from the URL with links in markdown format, or an error message
     """
     try:
         headers = {
@@ -27,6 +27,15 @@ def fetch_url_content(url):
         # Remove script and style elements
         for script in soup(["script", "style"]):
             script.decompose()
+        
+        # Replace links with markdown-style links to preserve them
+        for link in soup.find_all('a', href=True):
+            href = link.get('href', '')
+            text = link.get_text(strip=True)
+            # Only convert links that have both text and href, and aren't anchors or javascript
+            if href and text and not href.startswith('#') and not href.startswith('javascript:'):
+                # Replace the link tag with markdown syntax
+                link.replace_with(f"[{text}]({href})")
         
         # Get text content
         text = soup.get_text()
@@ -107,13 +116,14 @@ class ResearchCrew:
             - Complete description (verbatim)
             - All key details exactly as shown
             - All sections and subsections with their exact content
-            - Links and references
+            - ALL links and references in markdown format [text](url) - preserve these exactly
             - Any other information present on the page
             
             DO NOT analyze, interpret, or summarize. Provide the exact details as they appear on the page.
+            IMPORTANT: Preserve all markdown-formatted links [text](url) exactly as they appear.
             """,
             agent=content_scraper,
-            expected_output='A complete extraction of all exact details from the webpage without analysis'
+            expected_output='A complete extraction of all exact details from the webpage without analysis, including all links in markdown format'
         )
         
         # Task to convert to markdown
@@ -125,15 +135,16 @@ class ResearchCrew:
             - Preserve ALL exact details from the scraped content without interpretation
             - Have a clear hierarchical structure with appropriate headers (# ## ###)
             - Use bullet points and lists where appropriate
-            - Include all links exactly as they appear
+            - Include all markdown-formatted links [text](url) exactly as they appear in the scraped content
             - Be well-organized and easy to read
             - Use markdown formatting features like bold, italic, code blocks, etc. where appropriate
             - NOT add any analysis, commentary, or interpretation
             
-            Create a comprehensive markdown document with the exact details.
+            CRITICAL: Preserve all links in markdown format [text](url) - do not modify or remove them.
+            Create a comprehensive markdown document with the exact details including all links.
             """,
             agent=markdown_formatter,
-            expected_output='A well-formatted markdown document containing all exact details from the webpage without analysis'
+            expected_output='A well-formatted markdown document containing all exact details from the webpage without analysis, with all links preserved in markdown format'
         )
         
         # Create crew
